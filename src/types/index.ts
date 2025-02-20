@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+// Basic interfaces
 export interface ProcessingState {
   summarizing: boolean;
   translating: boolean;
@@ -24,19 +24,58 @@ export interface Language {
   label: string;
 }
 
+// Event and monitor interfaces
+interface DownloadProgressEvent {
+  loaded: number;
+  total: number;
+}
+
+interface Monitor {
+  addEventListener(event: 'downloadprogress', callback: (event: DownloadProgressEvent) => void): void;
+}
+
+// Chrome AI API interfaces
+interface LanguageDetector {
+  detect(text: string): Promise<LanguagePrediction[]>;
+}
+
+interface Translator {
+  translate(text: string): Promise<string | { translation: string }>;
+}
+
+interface Summarizer {
+  summarize(text: string): Promise<string | { summary: string } | string[]>;
+}
+
+interface Capabilities {
+  available: 'yes' | 'no' | 'after-download';
+  languagePairAvailable?: (source: string, target: string) => Promise<'readily' | 'after-download' | 'no'>;
+}
+
+interface AILanguageDetectorAPI {
+  capabilities(): Promise<Capabilities>;
+  create(options: { monitor?: (m: Monitor) => void }): Promise<LanguageDetector>;
+}
+
+interface AITranslatorAPI {
+  capabilities(): Promise<Capabilities>;
+  create(options: {
+    sourceLanguage: string;
+    targetLanguage: string;
+    monitor?: (m: Monitor) => void;
+  }): Promise<Translator>;
+}
+
+interface AISummarizerAPI {
+  capabilities(): Promise<Capabilities>;
+  create(options: { monitor?: (m: Monitor) => void }): Promise<Summarizer>;
+}
+
+// Main AIWindow interface
 export interface AIWindow extends Window {
   ai: {
-    languageDetector: {
-      capabilities: () => Promise<{ available: 'yes' | 'no' }>;
-      create: (options?: { monitor?: (m: any) => void }) => Promise<any>;
-    };
-    translator: {
-      capabilities: () => Promise<{ available: 'yes' | 'no' }>;
-      create: (options?: { monitor?: (m: any) => void }) => Promise<any>;
-    };
-    summarizer: {
-      capabilities: () => Promise<{ available: 'yes' | 'no' }>;
-      create: (options?: { monitor?: (m: any) => void }) => Promise<any>;
-    };
+    languageDetector: AILanguageDetectorAPI;
+    translator: AITranslatorAPI;
+    summarizer: AISummarizerAPI;
   };
 }
