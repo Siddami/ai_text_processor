@@ -49,7 +49,7 @@ const TextProcessor = () => {
         text: inputText.trim(),
         detectedLanguage,
         confidence,
-        selectedLanguage: 'en', // Default language
+        selectedLanguage: 'en', 
         processing: {
           summarizing: false,
           translating: false
