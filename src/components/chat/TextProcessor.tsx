@@ -11,9 +11,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Message, Language } from '@/types';
 
 const TextProcessor = () => {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<(Message & { selectedLanguage: string })[]>([]);
   const [inputText, setInputText] = useState('');
-  const [selectedLanguage, setSelectedLanguage] = useState('en');
   const [error, setError] = useState<string | null>(null);
 
   const languages: Language[] = [
@@ -35,7 +34,7 @@ const TextProcessor = () => {
 
   const handleError = (message: string) => {
     setError(message);
-    setTimeout(() => setError(null), 4000); // Error collapses after 4 seconds
+    setTimeout(() => setError(null), 4000);
   };
 
   const handleSend = async () => {
@@ -45,11 +44,12 @@ const TextProcessor = () => {
     try {
       const { detectedLanguage, confidence } = await detectLanguage(inputText);
       
-      const newMessage: Message = {
+      const newMessage: Message & { selectedLanguage: string } = {
         id: Date.now().toString(),
         text: inputText.trim(),
         detectedLanguage,
         confidence,
+        selectedLanguage: 'en', // Default language
         processing: {
           summarizing: false,
           translating: false
@@ -67,7 +67,6 @@ const TextProcessor = () => {
   const handleSummarize = async (messageId: string) => {
     setError(null);
 
-    // Update processing state for this specific message
     setMessages(prev => prev.map(message => 
       message.id === messageId 
         ? { ...message, processing: { ...message.processing, summarizing: true } }
@@ -93,7 +92,6 @@ const TextProcessor = () => {
       handleError('Failed to summarize text. Please try again.');
       console.error('Error summarizing text:', err);
       
-      // Reset processing state on error
       setMessages(prev => prev.map(message => 
         message.id === messageId 
           ? { ...message, processing: { ...message.processing, summarizing: false } }
@@ -102,10 +100,17 @@ const TextProcessor = () => {
     }
   };
 
+  const handleLanguageChange = (messageId: string, language: string) => {
+    setMessages(prev => prev.map(message =>
+      message.id === messageId
+        ? { ...message, selectedLanguage: language }
+        : message
+    ));
+  };
+
   const handleTranslate = async (messageId: string) => {
     setError(null);
 
-    // Update processing state for this specific message
     setMessages(prev => prev.map(message => 
       message.id === messageId 
         ? { ...message, processing: { ...message.processing, translating: true } }
@@ -121,7 +126,7 @@ const TextProcessor = () => {
 
       const translation = await translateText(
         messageToUpdate.text,
-        selectedLanguage,
+        messageToUpdate.selectedLanguage, // Use message-specific selected language
         messageToUpdate.detectedLanguage
       );
 
@@ -139,7 +144,6 @@ const TextProcessor = () => {
       handleError(errorMessage);
       console.error('Error translating text:', err);
       
-      // Reset processing state on error
       setMessages(prev => prev.map(message => 
         message.id === messageId 
           ? { ...message, processing: { ...message.processing, translating: false } }
@@ -156,10 +160,10 @@ const TextProcessor = () => {
         </Alert>
       )}
 
-      <Card className="flex-1 mb-4 overflow-hidden border-none">
+      <Card className="flex-1 mb-4 overflow-hidden border-none space-y-5">
         <CardContent className="h-full overflow-y-auto p-4 space-y-4">
           {messages.map((message) => (
-            <div key={message.id} className="space-y-2 w-[85%] lg:w-[60%] bg-violet-300 text-white p-4 rounded-xl shadow-lg">
+            <div key={message.id} className="space-y-2 w-[85%] lg:w-[60%] bg-purple-950 text-white p-4 rounded-xl shadow-lg">
               <div className="bg-secondary p-3 rounded-lg">
                 <p className="text-secondary-foreground textShadow-lg">{message.text}</p>
               </div>
@@ -189,8 +193,8 @@ const TextProcessor = () => {
                 
                 <div className="flex items-center gap-2">
                   <Select
-                    value={selectedLanguage}
-                    onValueChange={setSelectedLanguage}
+                    value={message.selectedLanguage}
+                    onValueChange={(value) => handleLanguageChange(message.id, value)}
                     disabled={message.processing?.translating}
                   >
                     <SelectTrigger className="w-32 hover:bg-purple-600">
