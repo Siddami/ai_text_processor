@@ -39,7 +39,7 @@ interface LanguageDetector {
   detect(text: string): Promise<LanguagePrediction[]>;
 }
 
-interface Translator {
+export interface Translator {
   translate(text: string): Promise<{ translation: string }>;
 }
 
@@ -73,10 +73,12 @@ interface AISummarizerAPI {
 }
 
 // Main AIWindow interface
-export interface AIWindow extends Window {
-  ai: {
-    languageDetector: AILanguageDetectorAPI;
-    translator: AITranslatorAPI;
-    summarizer: AISummarizerAPI;
-  };
+export interface AI {
+  languageDetector: AILanguageDetectorAPI;
+  translator: AITranslatorAPI;
+  summarizer: AISummarizerAPI;
+}
+
+export interface AIWindow {
+  ai: AI;
 }

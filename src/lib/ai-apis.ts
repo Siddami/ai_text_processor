@@ -1,5 +1,8 @@
+import { AI, Translator } from '../types';
 declare global {
-  interface Window extends AIWindow {}
+  interface Window {
+    ai: AI;
+  }
 }
 
 export async function translateText(
