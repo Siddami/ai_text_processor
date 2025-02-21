@@ -121,6 +121,11 @@ const TextProcessor = () => {
       const messageToUpdate = messages.find(m => m.id === messageId);
       if (!messageToUpdate?.detectedLanguage) {
         setError('Detected language not found.');
+        setMessages(prev => prev.map(message => 
+          message.id === messageId 
+            ? { ...message, processing: { ...message.processing, translating: false } }
+            : message
+        ));
         return;
       }
 
@@ -198,7 +203,7 @@ const TextProcessor = () => {
                     disabled={message.processing?.translating}
                   >
                     <SelectTrigger className="w-32 hover:bg-purple-600">
-                      <SelectValue />
+                      <SelectValue placeholder="Select Language" />
                     </SelectTrigger>
                     <SelectContent className='bg-violet-400'>
                       {languages.map((lang) => (

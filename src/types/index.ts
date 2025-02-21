@@ -40,12 +40,13 @@ interface LanguageDetector {
 }
 
 interface Translator {
-  translate(text: string): Promise<string | { translation: string }>;
+  translate(text: string): Promise<{ translation: string }>;
 }
 
 interface Summarizer {
-  summarize(text: string): Promise<string | { summary: string } | string[]>;
+  summarize(text: string): Promise<{ summary: string } | { summary: string }[]>;
 }
+
 
 interface Capabilities {
   available: 'yes' | 'no' | 'after-download';

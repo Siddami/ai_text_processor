@@ -136,13 +136,11 @@ export async function summarizeText(text: string): Promise<string> {
       if (typeof result === 'string') {
         return result;
       }
-      if (typeof result === 'object') {
-        if ('summary' in result && typeof result.summary === 'string') {
-          return result.summary;
-        }
-        if (Array.isArray(result)) {
-          return result.join('\n');
-        }
+      if (Array.isArray(result)) {
+        return result.join('\n'); // Handle array before object
+      }
+      if (typeof result === 'object' && 'summary' in result && typeof result.summary === 'string') {
+        return result.summary;
       }
     }
     
