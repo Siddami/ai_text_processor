@@ -69,7 +69,11 @@ const TextProcessor = () => {
 
     setMessages(prev => prev.map(message => 
       message.id === messageId 
-        ? { ...message, processing: { ...message.processing, summarizing: true } }
+        ? { ...message, processing: { 
+            ...message.processing, 
+            summarizing: true, 
+            translating: message.processing?.translating ?? false
+          } }
         : message
     ));
 
@@ -84,7 +88,11 @@ const TextProcessor = () => {
           ? { 
               ...message, 
               summary,
-              processing: { ...message.processing, summarizing: false }
+              processing: { 
+                ...message.processing, 
+                summarizing: false,
+                translating: message.processing?.translating ?? false 
+              }
             }
           : message
       ));
@@ -94,7 +102,11 @@ const TextProcessor = () => {
       
       setMessages(prev => prev.map(message => 
         message.id === messageId 
-          ? { ...message, processing: { ...message.processing, summarizing: false } }
+          ? { ...message, processing: { 
+              ...message.processing, 
+              summarizing: false ,
+              translating: message.processing?.translating ?? false
+            } }
           : message
       ));
     }
@@ -113,7 +125,11 @@ const TextProcessor = () => {
 
     setMessages(prev => prev.map(message => 
       message.id === messageId 
-        ? { ...message, processing: { ...message.processing, translating: true } }
+        ? { ...message, processing: { 
+            ...message.processing, 
+            translating: true,
+            summarizing: message.processing?.summarizing ?? false 
+          } }
         : message
     ));
 
@@ -123,7 +139,11 @@ const TextProcessor = () => {
         setError('Detected language not found.');
         setMessages(prev => prev.map(message => 
           message.id === messageId 
-            ? { ...message, processing: { ...message.processing, translating: false } }
+            ? { ...message, processing: { 
+              ...message.processing, 
+              translating: false,
+              summarizing: message.processing?.summarizing ?? false
+             } }
             : message
         ));
         return;
@@ -140,7 +160,11 @@ const TextProcessor = () => {
           ? { 
               ...message, 
               translation,
-              processing: { ...message.processing, translating: false }
+              processing: { 
+                ...message.processing, 
+                translating: false ,
+                summarizing: message.processing?.summarizing ?? false
+              }
             }
           : message
       ));
@@ -151,7 +175,11 @@ const TextProcessor = () => {
       
       setMessages(prev => prev.map(message => 
         message.id === messageId 
-          ? { ...message, processing: { ...message.processing, translating: false } }
+          ? { ...message, processing: { 
+              ...message.processing, 
+              translating: false,
+              summarizing: message.processing?.summarizing ?? false
+             } }
           : message
       ));
     }
