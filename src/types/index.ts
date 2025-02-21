@@ -1,4 +1,4 @@
-// Basic interfaces
+// Basic interfaces.
 export interface ProcessingState {
   summarizing: boolean;
   translating: boolean;
