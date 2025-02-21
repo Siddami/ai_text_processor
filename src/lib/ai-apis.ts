@@ -1,20 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { LanguagePrediction, AIWindow } from '@/types';
-
-
 declare global {
   interface Window extends AIWindow {}
 }
-
-
-function checkAIAvailability() {
-  if (!('ai' in window)) {
-    throw new Error(
-      "Chrome AI APIs are not available. Please ensure you're using Chrome and have enabled the appropriate flags."
-    );
-  }
-}
-
 
 export async function translateText(
   text: string,
@@ -29,7 +15,7 @@ export async function translateText(
 
   try {
     const translatorCapabilities = await window.ai.translator.capabilities();
-    const availability = await translatorCapabilities.languagePairAvailable(sourceLanguage, targetLanguage);
+    const availability = await translatorCapabilities.languagePairAvailable?.(sourceLanguage, targetLanguage);
     
     console.log(`Translation availability status: ${availability}`);
     console.log(`Attempting translation from ${sourceLanguage} to ${targetLanguage}`);
@@ -41,7 +27,7 @@ export async function translateText(
       );
     }
 
-    let translator
+    let translator: Translator;
     try {
       translator = await window.ai.translator.create({
         sourceLanguage,
@@ -82,14 +68,11 @@ export async function translateText(
   }
 }
 
-// Language Detection
 export async function detectLanguage(text: string): Promise<{ 
   detectedLanguage: string; 
   confidence: number 
 }> {
-  checkAIAvailability();
-  
-  if (!window.ai.languageDetector) {
+  if (!('ai' in window) || !('languageDetector' in window.ai)) {
     throw new Error("Language detection API is not available");
   }
 
@@ -100,8 +83,8 @@ export async function detectLanguage(text: string): Promise<{
     }
 
     const detector = await window.ai.languageDetector.create({
-      monitor(m: any) {
-        m.addEventListener('downloadprogress', (e: any) => {
+      monitor(m) {
+        m.addEventListener('downloadprogress', (e) => {
           console.log(`Language model download progress: ${e.loaded}/${e.total} bytes`);
         });
       },
@@ -111,7 +94,7 @@ export async function detectLanguage(text: string): Promise<{
     console.log('Language detection result:', result);
 
     if (Array.isArray(result)) {
-      const bestPrediction = result.reduce((prev: LanguagePrediction, current: LanguagePrediction) => 
+      const bestPrediction = result.reduce((prev, current) => 
         current.confidence > prev.confidence ? current : prev
       );
 
@@ -128,12 +111,8 @@ export async function detectLanguage(text: string): Promise<{
   }
 }
 
-
-// Text Summarization
 export async function summarizeText(text: string): Promise<string> {
-  checkAIAvailability();
-
-  if (!window.ai.summarizer) {
+  if (!('ai' in window) || !('summarizer' in window.ai)) {
     throw new Error("Summarization API is not available");
   }
 
@@ -144,8 +123,8 @@ export async function summarizeText(text: string): Promise<string> {
     }
 
     const summarizer = await window.ai.summarizer.create({
-      monitor(m: any) {
-        m.addEventListener('downloadprogress', (e: any) => {
+      monitor(m) {
+        m.addEventListener('downloadprogress', (e) => {
           console.log(`Summarization model download progress: ${e.loaded}/${e.total} bytes`);
         });
       },
@@ -153,24 +132,18 @@ export async function summarizeText(text: string): Promise<string> {
 
     const result = await summarizer.summarize(text);
 
-    // Handle different possible response formats
     if (result) {
       if (typeof result === 'string') {
         return result;
       }
       if (typeof result === 'object') {
-        if (typeof result.summary === 'string') {
+        if ('summary' in result && typeof result.summary === 'string') {
           return result.summary;
         }
-        // Handle bullet point format
         if (Array.isArray(result)) {
           return result.join('\n');
         }
       }
-    }
-    
-    if (result) {
-      return String(result);
     }
     
     throw new Error("Unexpected response format from summarizer");
